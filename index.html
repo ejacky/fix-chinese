@@ -1,128 +1,155 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fix Your Chinese</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
-      margin: 0;
-      background: #f7f7f7;
-      color: #222;
-    }
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 40px 20px;
-      text-align: center;
-    }
-    h1 {
-      font-size: 36px;
-      margin-bottom: 10px;
-    }
-    p {
-      color: #555;
-      font-size: 16px;
-    }
-    textarea {
-      width: 100%;
-      height: 120px;
-      margin-top: 20px;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      resize: none;
-    }
-    button {
-      margin-top: 15px;
-      padding: 12px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background: black;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #333;
-    }
-    .box {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 30px;
-      text-align: left;
-    }
-    .label {
-      font-weight: bold;
-      margin-top: 10px;
-    }
-    .cta {
-      margin-top: 40px;
-    }
-  </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fix Your Chinese</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+        margin: 0;
+        background: #f7f7f7;
+        color: #222;
+      }
+      .container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        text-align: center;
+      }
+      h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+      }
+      p {
+        color: #555;
+        font-size: 16px;
+      }
+      textarea {
+        width: 100%;
+        height: 120px;
+        margin-top: 20px;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        resize: none;
+      }
+      button {
+        margin-top: 15px;
+        padding: 12px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        background: black;
+        color: white;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #333;
+      }
+      .box {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 30px;
+        text-align: left;
+      }
+      .label {
+        font-weight: bold;
+        margin-top: 10px;
+      }
+      .cta {
+        margin-top: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Fix Your Chinese Like a Native Speaker</h1>
+      <p>
+        Get instant corrections and clear explanations — just like a real
+        teacher.
+      </p>
 
-  <div class="container">
-    <h1>Fix Your Chinese Like a Native Speaker</h1>
-    <p>Get instant corrections and clear explanations — just like a real teacher.</p>
+      <textarea placeholder="Paste your Chinese sentence here..."></textarea>
+      <br />
+      <button onclick="fakeResult()">Try it free</button>
 
-    <textarea placeholder="Paste your Chinese sentence here..."></textarea>
-    <br />
-    <button onclick="fakeResult()">Try it free</button>
+      <div id="result" class="box" style="display: none">
+        <div class="label">✅ Correction</div>
+        <div>我昨天去超市买了很多东西</div>
 
-    <div id="result" class="box" style="display:none;">
-      <div class="label">✅ Correction</div>
-      <div>我昨天去超市买了很多东西</div>
+        <div class="label">📖 Explanation</div>
+        <div>
+          In Chinese, “很多” usually comes before the noun, not after the verb
+          phrase.
+        </div>
 
-      <div class="label">📖 Explanation</div>
-      <div>In Chinese, “很多” usually comes before the noun, not after the verb phrase.</div>
+        <div class="label">🔥 More natural</div>
+        <div>
+          - 我昨天买了不少东西<br />
+          - 我昨天在超市花了不少钱
+        </div>
+      </div>
 
-      <div class="label">🔥 More natural</div>
-      <div>
-        - 我昨天买了不少东西<br/>
-        - 我昨天在超市花了不少钱
+      <div class="box">
+        <div class="label">💡 Example</div>
+        <p><b>You wrote:</b> 我昨天去超市买东西很多</p>
+        <p><b>We suggest:</b> 我昨天去超市买了很多东西</p>
+      </div>
+
+      <div class="box">
+        <div class="label">🎯 Who is this for?</div>
+        <p>
+          Chinese learners who want to sound natural<br />
+          HSK students improving writing<br />
+          Anyone unsure if their sentence is correct
+        </p>
+      </div>
+
+      <div class="box">
+        <div class="label">⚡ Why not just use ChatGPT?</div>
+        <p>
+          Structured corrections<br />
+          Teacher-style explanations<br />
+          Designed for learning Chinese
+        </p>
+      </div>
+
+      <div class="cta">
+        <button>Start improving your Chinese</button>
+        <p style="font-size: 12px; color: #888">No signup required</p>
       </div>
     </div>
 
-    <div class="box">
-      <div class="label">💡 Example</div>
-      <p><b>You wrote:</b> 我昨天去超市买东西很多</p>
-      <p><b>We suggest:</b> 我昨天去超市买了很多东西</p>
-    </div>
+    <script>
+      async function fakeResult() {
+        const text = document.querySelector("textarea").value;
 
-    <div class="box">
-      <div class="label">🎯 Who is this for?</div>
-      <p>
-        Chinese learners who want to sound natural<br/>
-        HSK students improving writing<br/>
-        Anyone unsure if their sentence is correct
-      </p>
-    </div>
+        const res = await fetch("/api/correct", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text }),
+        });
 
-    <div class="box">
-      <div class="label">⚡ Why not just use ChatGPT?</div>
-      <p>
-        Structured corrections<br/>
-        Teacher-style explanations<br/>
-        Designed for learning Chinese
-      </p>
-    </div>
+        const data = await res.json();
 
-    <div class="cta">
-      <button>Start improving your Chinese</button>
-      <p style="font-size:12px;color:#888;">No signup required</p>
-    </div>
-  </div>
-
-  <script>
-    function fakeResult() {
-      document.getElementById("result").style.display = "block";
-    }
-  </script>
-
-</body>
+        document.getElementById("result").style.display = "block";
+        document.getElementById("result").innerHTML = `
+        <div class="label">✅ Correction</div>
+        <div>${data.correction}</div>
+    
+        <div class="label">📖 Explanation</div>
+        <div>${data.explanation}</div>
+    
+        <div class="label">🔥 More natural</div>
+        <div>${data.natural.join("<br/>")}</div>
+      `;
+      }
+    </script>
+  </body>
 </html>
