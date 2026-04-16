@@ -3,8 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,8 +16,34 @@ type Request struct {
 	Text string `json:"text"`
 }
 
+type LLMResult struct {
+	Correction  string   `json:"correction"`
+	Explanation string   `json:"explanation"`
+	Natural     []string `json:"natural"`
+}
+
+type openAIChatResponse struct {
+	Choices []struct {
+		Message struct {
+			Content string `json:"content"`
+		} `json:"message"`
+	} `json:"choices"`
+	Error *struct {
+		Message string `json:"message"`
+		Type    string `json:"type"`
+	} `json:"error"`
+}
+
 func main() {
 	r := gin.Default()
+
+	// Serve the single-page frontend.
+	r.GET("/", func(c *gin.Context) {
+		c.File("index.html")
+	})
+	r.GET("/index.html", func(c *gin.Context) {
+		c.File("index.html")
+	})
 
 	r.POST("/api/correct", func(c *gin.Context) {
 		var req Request
@@ -23,20 +52,28 @@ func main() {
 			return
 		}
 
-		result, err := callLLM(req.Text)
+		result, status, err := callLLM(req.Text)
 		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
+			if status < 400 || status > 599 {
+				status = 500
+			}
+			c.JSON(status, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.Data(200, "application/json", result)
+		c.JSON(200, result)
 	})
 
 	r.Run(":8080")
 }
 
-func callLLM(input string) ([]byte, error) {
+func callLLM(input string) (LLMResult, int, error) {
+	var out LLMResult
+
 	apiKey := os.Getenv("OPENAI_API_KEY")
+	if strings.TrimSpace(apiKey) == "" {
+		return out, http.StatusUnauthorized, errors.New("missing OPENAI_API_KEY")
+	}
 
 	payload := map[string]interface{}{
 		"model": "gpt-4o-mini",
@@ -76,14 +113,66 @@ Rules:
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return out, http.StatusBadGateway, err
 	}
 	defer resp.Body.Close()
 
-	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return out, http.StatusBadGateway, err
+	}
 
-	content := res["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		// Try to surface upstream error message if possible.
+		var parsed openAIChatResponse
+		_ = json.Unmarshal(respBody, &parsed)
+		msg := "upstream LLM request failed"
+		if parsed.Error != nil && strings.TrimSpace(parsed.Error.Message) != "" {
+			msg = parsed.Error.Message
+		} else {
+			// Fallback: try generic { "error": { "message": "..." } }.
+			var generic map[string]any
+			if json.Unmarshal(respBody, &generic) == nil {
+				if e, ok := generic["error"].(map[string]any); ok {
+					if m, ok := e["message"].(string); ok && strings.TrimSpace(m) != "" {
+						msg = m
+					}
+				}
+			}
+		}
+		return out, resp.StatusCode, errors.New(msg)
+	}
 
-	return []byte(content), nil
+	// Parse upstream OpenAI-compatible response.
+	var res openAIChatResponse
+	if err := json.Unmarshal(respBody, &res); err != nil {
+		return out, http.StatusBadGateway, err
+	}
+	if len(res.Choices) == 0 {
+		return out, http.StatusBadGateway, errors.New("upstream response missing choices")
+	}
+	content := strings.TrimSpace(res.Choices[0].Message.Content)
+	if content == "" {
+		return out, http.StatusBadGateway, errors.New("upstream response missing message content")
+	}
+
+	// The LLM returns JSON *as a string* in content; parse it into a real JSON object.
+	jsonText := extractJSON(content)
+	if err := json.Unmarshal([]byte(jsonText), &out); err != nil {
+		return out, http.StatusBadGateway, err
+	}
+	return out, http.StatusOK, nil
+}
+
+func extractJSON(s string) string {
+	s = strings.TrimSpace(s)
+
+	// If the model wrapped JSON in markdown code fences, attempt to grab the raw JSON block.
+	// This keeps parsing robust even when the model isn't perfectly formatted.
+	if i := strings.Index(s, "{"); i >= 0 {
+		if j := strings.LastIndex(s, "}"); j > i {
+			return s[i : j+1]
+		}
+	}
+	return s
 }
