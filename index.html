@@ -5,153 +5,267 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fix Your Chinese</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
         margin: 0;
-        background: #f7f7f7;
-        color: #222;
+        background: #fff;
+        color: #1a1a1a;
+        line-height: 1.6;
       }
       .container {
-        max-width: 720px;
+        max-width: 640px;
         margin: 0 auto;
-        padding: 40px 20px;
+        padding: 80px 24px;
+      }
+      header {
         text-align: center;
+        margin-bottom: 48px;
       }
       h1 {
-        font-size: 36px;
-        margin-bottom: 10px;
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0 0 8px;
+        letter-spacing: -0.5px;
       }
-      p {
-        color: #555;
-        font-size: 16px;
+      .subtitle {
+        color: #666;
+        font-size: 15px;
+        margin: 0;
+      }
+      .input-area {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 32px;
       }
       textarea {
         width: 100%;
         height: 120px;
-        margin-top: 20px;
-        padding: 12px;
+        padding: 16px;
         font-size: 16px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        background: #fafafa;
         resize: none;
+        outline: none;
+        transition: border-color 0.2s, background 0.2s;
+      }
+      textarea:focus {
+        border-color: #1a1a1a;
+        background: #fff;
       }
       button {
-        margin-top: 15px;
-        padding: 12px 20px;
-        font-size: 16px;
+        padding: 14px 24px;
+        font-size: 15px;
+        font-weight: 600;
         border: none;
-        border-radius: 8px;
-        background: black;
-        color: white;
+        border-radius: 10px;
+        background: #1a1a1a;
+        color: #fff;
         cursor: pointer;
+        align-self: flex-start;
+        transition: background 0.2s, transform 0.1s;
       }
       button:hover {
         background: #333;
       }
-      .box {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        margin-top: 30px;
-        text-align: left;
+      button:active {
+        transform: scale(0.98);
       }
-      .label {
-        font-weight: bold;
-        margin-top: 10px;
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
       }
-      .cta {
-        margin-top: 40px;
+
+      /* Result card */
+      .result {
+        display: none;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      }
+      .result.visible {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .result-section {
+        margin-bottom: 20px;
+      }
+      .result-section:last-child {
+        margin-bottom: 0;
+      }
+      .result-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+      }
+      .result-value {
+        font-size: 17px;
+        color: #1a1a1a;
+      }
+      .result-value.correction {
+        font-size: 20px;
+        font-weight: 600;
+        color: #0d7377;
+      }
+      .alternatives {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .alt-item {
+        padding: 10px 14px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        font-size: 15px;
+        color: #333;
+      }
+      .hsk-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #1a1a1a;
+        color: #fff;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      /* Example hint */
+      .hint {
+        text-align: center;
+        color: #999;
+        font-size: 13px;
+        margin-top: 8px;
+      }
+      .hint kbd {
+        font-family: inherit;
+        background: #f0f0f0;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #555;
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        margin-top: 60px;
+        padding-top: 24px;
+        border-top: 1px solid #f0f0f0;
+      }
+      footer p {
+        font-size: 13px;
+        color: #aaa;
+        margin: 0;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Fix Your Chinese Like a Native Speaker</h1>
-      <p>
-        Get instant corrections and clear explanations — just like a real
-        teacher.
-      </p>
+      <header>
+        <h1>Fix Your Chinese</h1>
+        <p class="subtitle">Get instant corrections and clear explanations</p>
+      </header>
 
-      <textarea placeholder="Paste your Chinese sentence here..."></textarea>
-      <br />
-      <button onclick="fakeResult()">Try it free</button>
+      <div class="input-area">
+        <textarea
+          id="input"
+          placeholder="Paste your Chinese sentence here..."
+        ></textarea>
+        <button id="submitBtn" onclick="submitText()">Check sentence</button>
+      </div>
 
-      <div id="result" class="box" style="display: none">
-        <div class="label">✅ Correction</div>
-        <div>我昨天去超市买了很多东西</div>
-
-        <div class="label">📖 Explanation</div>
-        <div>
-          In Chinese, “很多” usually comes before the noun, not after the verb
-          phrase.
+      <div id="result" class="result">
+        <div class="result-section">
+          <div class="result-label">Correction</div>
+          <div id="r-correction" class="result-value correction"></div>
         </div>
-
-        <div class="label">🔥 More natural</div>
-        <div>
-          - 我昨天买了不少东西<br />
-          - 我昨天在超市花了不少钱
+        <div class="result-section">
+          <div class="result-label">Explanation</div>
+          <div id="r-explanation" class="result-value"></div>
+        </div>
+        <div class="result-section">
+          <div class="result-label">More natural</div>
+          <div id="r-natural" class="alternatives"></div>
+        </div>
+        <div class="result-section">
+          <div class="result-label">HSK Level</div>
+          <span id="r-hsk" class="hsk-badge"></span>
         </div>
       </div>
 
-      <div class="box">
-        <div class="label">💡 Example</div>
-        <p><b>You wrote:</b> 我昨天去超市买东西很多</p>
-        <p><b>We suggest:</b> 我昨天去超市买了很多东西</p>
-      </div>
-
-      <div class="box">
-        <div class="label">🎯 Who is this for?</div>
-        <p>
-          Chinese learners who want to sound natural<br />
-          HSK students improving writing<br />
-          Anyone unsure if their sentence is correct
-        </p>
-      </div>
-
-      <div class="box">
-        <div class="label">⚡ Why not just use ChatGPT?</div>
-        <p>
-          Structured corrections<br />
-          Teacher-style explanations<br />
-          Designed for learning Chinese
-        </p>
-      </div>
-
-      <div class="cta">
-        <button>Start improving your Chinese</button>
-        <p style="font-size: 12px; color: #888">No signup required</p>
-      </div>
+      <footer>
+        <p>No signup required &middot; Designed for Chinese learners</p>
+      </footer>
     </div>
 
     <script>
-      async function fakeResult() {
-        const text = document.querySelector("textarea").value;
+      const input = document.getElementById("input");
+      const btn = document.getElementById("submitBtn");
+      const result = document.getElementById("result");
 
-        const res = await fetch("/api/correct", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ text }),
-        });
+      input.addEventListener("keydown", (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+          submitText();
+        }
+      });
 
-        const data = await res.json();
+      async function submitText() {
+        const text = input.value.trim();
+        if (!text) {
+          input.focus();
+          return;
+        }
 
-        document.getElementById("result").style.display = "block";
-        document.getElementById("result").innerHTML = `
-        <div class="label">✅ Correction</div>
-        <div>${data.correction}</div>
-    
-        <div class="label">📖 Explanation</div>
-        <div>${data.explanation}</div>
-    
-        <div class="label">🔥 More natural</div>
-        <div>${data.natural.join("<br/>")}</div>
+        btn.disabled = true;
+        btn.textContent = "Checking...";
+        result.classList.remove("visible");
 
-        <div class="label">📊 HSK Level</div>
-        <div>Level ${data.hsk_level}</div>
-      `;
+        try {
+          const res = await fetch("/api/correct", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+          const data = await res.json();
+
+          document.getElementById("r-correction").textContent = data.correction;
+          document.getElementById("r-explanation").textContent = data.explanation;
+
+          const naturalContainer = document.getElementById("r-natural");
+          naturalContainer.innerHTML = data.natural
+            .map((s) => `<div class="alt-item">${s}</div>`)
+            .join("");
+
+          document.getElementById("r-hsk").textContent = `Level ${data.hsk_level}`;
+
+          result.classList.add("visible");
+          result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } catch (err) {
+          alert("Something went wrong. Please try again.");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Check sentence";
+        }
       }
     </script>
   </body>
