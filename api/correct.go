@@ -18,6 +18,7 @@ type LLMResult struct {
 	Correction  string   `json:"correction"`
 	Explanation string   `json:"explanation"`
 	Natural     []string `json:"natural"`
+	HSKLevel    string   `json:"hsk_level"`
 }
 
 type openAIChatResponse struct {
@@ -86,6 +87,7 @@ Your job:
 - Correct the student's Chinese sentence
 - Explain mistakes clearly in simple English
 - Provide more natural alternatives used by native speakers
+- Estimate the HSK level (1-6) of the original sentence based on vocabulary and grammar used
 
 Rules:
 1. Be friendly and encouraging
@@ -94,7 +96,8 @@ Rules:
 {
   "correction": "...",
   "explanation": "...",
-  "natural": ["...", "..."]
+  "natural": ["...", "..."],
+  "hsk_level": "3"
 }
 If the output is not valid JSON, fix it before responding.`,
 			},
