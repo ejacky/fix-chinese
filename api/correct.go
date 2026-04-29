@@ -12,6 +12,7 @@ import (
 
 type Request struct {
 	Text string `json:"text"`
+	Lang string `json:"lang"`
 }
 
 type LLMResult struct {
@@ -55,7 +56,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, status, err := callLLM(req.Text)
+	result, status, err := callLLM(req.Text, req.Lang)
 	if err != nil {
 		if status < 400 || status > 599 {
 			status = 500
@@ -68,7 +69,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func callLLM(input string) (LLMResult, int, error) {
+func callLLM(input, lang string) (LLMResult, int, error) {
 	var out LLMResult
 
 	apiKey := os.Getenv("OPENAI_API_KEY")
@@ -76,12 +77,7 @@ func callLLM(input string) (LLMResult, int, error) {
 		return out, http.StatusUnauthorized, errors.New("missing OPENAI_API_KEY")
 	}
 
-	payload := map[string]interface{}{
-		"model": "gpt-4o-mini",
-		"messages": []map[string]string{
-			{
-				"role": "system",
-				"content": `You are a professional Chinese teacher helping English-speaking students.
+	systemPrompt := `You are a professional Chinese teacher helping English-speaking students.
 
 Your job:
 - Correct the student's Chinese sentence
@@ -99,7 +95,36 @@ Rules:
   "natural": ["...", "..."],
   "hsk_level": "3"
 }
-If the output is not valid JSON, fix it before responding.`,
+If the output is not valid JSON, fix it before responding.`
+
+	if lang == "vi" {
+		systemPrompt = `You are a professional Chinese teacher helping Vietnamese students.
+
+Your job:
+- Correct the student's Chinese sentence
+- Explain mistakes clearly in simple Vietnamese
+- Provide more natural alternatives used by native speakers, with brief Vietnamese explanations if helpful
+- Estimate the HSK level (1-6) of the original sentence based on vocabulary and grammar used
+
+Rules:
+1. Be friendly and encouraging
+2. Keep explanations simple and use everyday Vietnamese
+3. Always respond in JSON format:
+{
+  "correction": "...",
+  "explanation": "...",
+  "natural": ["...", "..."],
+  "hsk_level": "3"
+}
+If the output is not valid JSON, fix it before responding.`
+	}
+
+	payload := map[string]interface{}{
+		"model": "gpt-4o-mini",
+		"messages": []map[string]string{
+			{
+				"role":    "system",
+				"content": systemPrompt,
 			},
 			{
 				"role":    "user",

@@ -183,7 +183,7 @@
     <div class="container">
       <header>
         <h1>Fix Your Chinese</h1>
-        <p class="subtitle">Get instant corrections and clear explanations</p>
+        <p class="subtitle" id="subtitle">Get instant corrections and clear explanations</p>
       </header>
 
       <div class="input-area">
@@ -196,31 +196,91 @@
 
       <div id="result" class="result">
         <div class="result-section">
-          <div class="result-label">Correction</div>
+          <div class="result-label" id="rl-correction">Correction</div>
           <div id="r-correction" class="result-value correction"></div>
         </div>
         <div class="result-section">
-          <div class="result-label">Explanation</div>
+          <div class="result-label" id="rl-explanation">Explanation</div>
           <div id="r-explanation" class="result-value"></div>
         </div>
         <div class="result-section">
-          <div class="result-label">More natural</div>
+          <div class="result-label" id="rl-natural">More natural</div>
           <div id="r-natural" class="alternatives"></div>
         </div>
         <div class="result-section">
-          <div class="result-label">HSK Level</div>
+          <div class="result-label" id="rl-hsk">HSK Level</div>
           <span id="r-hsk" class="hsk-badge"></span>
         </div>
       </div>
 
       <footer>
-        <p>No signup required &middot; Designed for Chinese learners</p>
+        <p id="footer-text">No signup required &middot; Designed for Chinese learners</p>
       </footer>
     </div>
 
     <script>
+      const i18n = {
+        en: {
+          title: "Fix Your Chinese",
+          subtitle: "Get instant corrections and clear explanations",
+          placeholder: "Paste your Chinese sentence here...",
+          btnCheck: "Check sentence",
+          btnChecking: "Checking...",
+          labelCorrection: "Correction",
+          labelExplanation: "Explanation",
+          labelNatural: "More natural",
+          labelHsk: "HSK Level",
+          footer: "No signup required · Designed for Chinese learners",
+          errorGeneric: "Something went wrong. Please try again."
+        },
+        vi: {
+          title: "Sửa Câu Tiếng Trung Củ Bạn",
+          subtitle: "Nhận sửa lỗi ngay và giải thích rõ ràng",
+          placeholder: "Dán câu tiếng Trung của bạn vào đây...",
+          btnCheck: "Kiểm tra câu",
+          btnChecking: "Đang kiểm tra...",
+          labelCorrection: "Sửa lại",
+          labelExplanation: "Giải thích",
+          labelNatural: "Tự nhiên hơn",
+          labelHsk: "Cấp độ HSK",
+          footer: "Không cần đăng ký · Dành cho ngườ học tiếng Trung",
+          errorGeneric: "Đã có lỗi xảy ra. Vui lòng thử lại."
+        }
+      };
+
+      function detectLang() {
+        const params = new URLSearchParams(window.location.search);
+        const paramLang = params.get("lang");
+        if (paramLang === "vi" || paramLang === "en") return paramLang;
+
+        const browserLang = navigator.language || navigator.userLanguage || "";
+        if (browserLang.toLowerCase().startsWith("vi")) return "vi";
+
+        try {
+          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          if (["Asia/Ho_Chi_Minh", "Asia/Hanoi", "Asia/Saigon"].includes(tz)) return "vi";
+        } catch (e) {}
+
+        return "en";
+      }
+
+      const lang = detectLang();
+      const t = i18n[lang];
+
+      document.documentElement.lang = lang;
+      document.title = t.title;
+      document.querySelector("h1").textContent = t.title;
+      document.getElementById("subtitle").textContent = t.subtitle;
+      document.getElementById("rl-correction").textContent = t.labelCorrection;
+      document.getElementById("rl-explanation").textContent = t.labelExplanation;
+      document.getElementById("rl-natural").textContent = t.labelNatural;
+      document.getElementById("rl-hsk").textContent = t.labelHsk;
+      document.getElementById("footer-text").textContent = t.footer;
+
       const input = document.getElementById("input");
+      input.placeholder = t.placeholder;
       const btn = document.getElementById("submitBtn");
+      btn.textContent = t.btnCheck;
       const result = document.getElementById("result");
 
       input.addEventListener("keydown", (e) => {
@@ -237,14 +297,14 @@
         }
 
         btn.disabled = true;
-        btn.textContent = "Checking...";
+        btn.textContent = t.btnChecking;
         result.classList.remove("visible");
 
         try {
           const res = await fetch("/api/correct", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text }),
+            body: JSON.stringify({ text, lang }),
           });
           const data = await res.json();
 
@@ -261,10 +321,10 @@
           result.classList.add("visible");
           result.scrollIntoView({ behavior: "smooth", block: "nearest" });
         } catch (err) {
-          alert("Something went wrong. Please try again.");
+          alert(t.errorGeneric);
         } finally {
           btn.disabled = false;
-          btn.textContent = "Check sentence";
+          btn.textContent = t.btnCheck;
         }
       }
     </script>

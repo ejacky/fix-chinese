@@ -66,6 +66,7 @@ In this phase, success means proving real user demand:
 - Simple English explanation
 - Natural alternative expressions
 - Landing page + basic CTA messaging for trial
+- Vietnamese UI + explanation support (auto-detected, no visible toggle)
 
 ## Out of Scope (Now)
 
@@ -73,7 +74,7 @@ In this phase, success means proving real user demand:
 - Deep personalization
 - Large-scale analytics stack
 - Enterprise-level product polish
-- Broad multi-language product expansion
+- Additional languages beyond English and Vietnamese
 
 ## AI Collaboration Guide (Token-Efficient)
 
